@@ -1,0 +1,24 @@
+FROM jupyter/minimal-notebook:python-3.11
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends nodejs npm tini && \
+    rm -rf /var/lib/apt/lists/*
+
+USER ${NB_UID}
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+      jupyterhub==4.1.* \
+      jupyterlab \
+      notebook \
+      nbgrader==0.9.5 \
+      scikit-learn \
+      python-Levenshtein
+
+USER root
+RUN mkdir -p /etc/jupyter && \
+    printf "c = get_config()\n"                          >  /etc/jupyter/nbgrader_config.py && \
+    printf "c.Exchange.root = '/srv/nbgrader/exchange'\n" >> /etc/jupyter/nbgrader_config.py && \
+    printf "c.Exchange.ensure_owner = False\n"            >> /etc/jupyter/nbgrader_config.py && \
+    printf "c.Exchange.path_includes_course = True\n"     >> /etc/jupyter/nbgrader_config.py
+USER ${NB_UID}
+

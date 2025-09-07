@@ -1,0 +1,29 @@
+
+services:
+  hub:
+    build:
+      context: .
+      dockerfile: Dockerfile.hub
+    image: nbgrader-hub:latest
+    container_name: nbgrader-hub
+    restart: unless-stopped
+    ports:
+      - "${HUB_PORT}:8000"
+    volumes:
+      - ./jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro
+      - nb-exchange:/srv/nbgrader/exchange
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      DOCKER_JUPYTER_IMAGE: "${DOCKER_JUPYTER_IMAGE}"
+      JUPYTERHUB_ADMIN: "${JUPYTERHUB_ADMIN}"
+      DUMMY_SHARED_PASSWORD: "${DUMMY_SHARED_PASSWORD}"
+      DOCKER_NETWORK_NAME: "${DOCKER_NETWORK_NAME}"
+    networks:
+      - hubnet
+
+volumes:
+  nb-exchange:
+
+networks:
+  hubnet:
+    name: "${DOCKER_NETWORK_NAME}"
